@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  experimental: {
+    instrumentationHook: true,
+  },
   // Headers to allow service worker scope
   async headers() {
     return [
