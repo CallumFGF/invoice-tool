@@ -1,77 +1,97 @@
 # Childminder Invoice
 
-A mobile-first Progressive Web App (PWA) for childminders in Kent, UK.
+A mobile-first Progressive Web App for childminders in Kent, UK.  
+**v2** — Google sign-in + Postgres database; data syncs across all devices.
 
 ## Features
 
-- **Families** — Store up to 6 families with multiple children, funding types, and contract details
-- **Invoice** — Auto-calculate contract days (weekdays minus bank holidays), input absences/closures, generate a print-ready invoice
-- **Settings** — Provider details, hourly rate, and bank details shown on every invoice
-- **Offline-ready** — Service worker caches the app shell
-- **Installable** — Add to Android home screen via browser "Install app" prompt
-- **Invoice reminders** — In-app banner (and native notification, if permitted) appears 2 weeks before month end
-
-## Kent funding data baked in
-
-- Term dates 2025/26 (Autumn, Spring, Summer)
-- England bank holidays 2025–2027
-- All 6 KCC funding types with correct funded hours per day
-
-## Tech stack
-
-- **Next.js 14** (App Router)
-- **TypeScript**
-- **Tailwind CSS**
-- **shadcn/ui** (Radix UI primitives)
-- **localStorage** — no backend required
-
----
+- **Google sign-in** — data is private and scoped to your account
+- **Cross-device sync** — Vercel Postgres (Neon) stores all family and settings data
+- **Families** — unlimited families, each with 1+ children
+- **Schedule builder** — Simple mode (day pills + time range) or Advanced mode (per-day start/end times)
+- **Invoice** — contract days auto-calculated from the actual attending weekdays and bank holidays; print/PDF ready
+- **Settings** — provider details, hourly rate, bank details
+- **PWA** — installable on Android, works offline
+- **Invoice reminders** — banner + native notification 14 days before month end
 
 ## Setup
 
+### 1 · Clone and install
+
 ```bash
+git clone https://github.com/callumfgf/invoice-tool
+cd invoice-tool
 npm install
+```
+
+### 2 · Create a Vercel Postgres database
+
+1. Go to [vercel.com](https://vercel.com) → your project → **Storage** → **Create Database** → **Postgres**
+2. After creation, click **Connect to Project**
+3. Go to **.env.local** tab → copy the `POSTGRES_URL` value
+
+### 3 · Run the database schema
+
+1. In the Vercel dashboard → Storage → your DB → **Query** tab
+2. Paste the contents of `scripts/schema.sql` and run it
+
+### 4 · Set up Google OAuth
+
+1. Go to [console.cloud.google.com](https://console.cloud.google.com) → APIs & Services → Credentials
+2. Create an **OAuth 2.0 Client ID** (Web application)
+3. Add authorised redirect URIs:
+   - `http://localhost:3000/api/auth/callback/google` (development)
+   - `https://your-app.vercel.app/api/auth/callback/google` (production)
+4. Copy the Client ID and Client Secret
+
+### 5 · Environment variables
+
+Create `.env.local` in the project root:
+
+```env
+AUTH_SECRET=<run: openssl rand -base64 32>
+AUTH_GOOGLE_ID=<from Google Cloud Console>
+AUTH_GOOGLE_SECRET=<from Google Cloud Console>
+POSTGRES_URL=<from Vercel Postgres>
+```
+
+In Vercel dashboard → your project → **Settings → Environment Variables** → add the same four variables.
+
+### 6 · Run locally
+
+```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3000](http://localhost:3000)
 
-## Deploy to Vercel
+### 7 · Deploy
 
-1. Push this repo to GitHub (already on branch `claude/invoice-tool-web-app-a74Y0`)
-2. Go to [vercel.com](https://vercel.com) → **Add New Project** → import the repo
-3. Leave all settings as default — Vercel auto-detects Next.js
-4. Click **Deploy**
+```bash
+git push origin main
+```
 
-No environment variables needed for v1.
+Vercel picks up the push and deploys automatically.
+
+---
+
+## Schedule modes
+
+**Simple** — set which days (Mon–Fri pills) and a single start/end time.  
+**Advanced** — toggle each day individually with its own start and end time.
+
+The billing engine counts the exact weekdays the child attends in a given month (minus bank holidays) to calculate contract days — no more approximate scaling.
 
 ## PWA icons
 
-Place two PNG icons in `public/icons/`:
+Add two PNGs to `public/icons/`:
 
 | File | Size |
 |------|------|
-| `icon-192.png` | 192 × 192 px |
-| `icon-512.png` | 512 × 512 px |
-
-These are referenced by `manifest.json` and the Apple touch icon meta tag.
-You can generate them quickly at [pwa-asset-generator](https://github.com/elegantapp/pwa-asset-generator)
-or use any 512 × 512 image (e.g. the Ofsted star or your own logo).
-
-## Print / PDF invoices
-
-On the Invoice tab, tap **Generate Invoice** then **Print / Save PDF**.
-The browser's print dialog opens; choose **Save as PDF** to get a portable copy.
-All UI chrome is hidden during printing — only the invoice document is shown.
+| `icon-192.png` | 192 × 192 |
+| `icon-512.png` | 512 × 512 |
 
 ## Payment reference format
 
-In Settings you can customise the reference format using these placeholders:
-
-| Placeholder | Example |
-|-------------|---------|
-| `{SURNAME}` | SMITH |
-| `{MON}` | JAN |
-| `{YEAR}` | 2026 |
-
+Placeholders: `{SURNAME}`, `{MON}`, `{YEAR}`  
 Default: `{SURNAME}-{MON}{YEAR}` → `SMITH-JAN2026`
