@@ -11,7 +11,6 @@ import { Separator } from '@/components/ui/separator';
 import type { Provider } from '@/lib/types';
 import { APP_VERSION, MONTH_NAMES } from '@/lib/constants';
 import { api } from '@/lib/api';
-import { UserMenu } from '@/components/auth/user-menu';
 
 const DEFAULT: Provider = {
   name: '', businessName: '', address: '', email: '', phone: '', ofstedNumber: '',
@@ -55,11 +54,6 @@ export function SettingsForm() {
 
   return (
     <div className="space-y-4 p-4 pb-8">
-      <h1 className="text-xl font-bold">Settings</h1>
-
-      {/* ── Signed-in user ── */}
-      <UserMenu />
-
       {loading ? (
         <div className="flex items-center justify-center py-10">
           <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />

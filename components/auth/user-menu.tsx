@@ -1,8 +1,9 @@
-import { auth, signOut } from '@/auth';
+import { auth } from '@/auth';
+import { signOutAction } from '@/app/actions/auth';
 import { Button } from '@/components/ui/button';
 import { LogOut } from 'lucide-react';
 
-/** Server component — rendered in the Settings page header */
+/** Server component — rendered in app/settings/page.tsx above SettingsForm */
 export async function UserMenu() {
   const session = await auth();
   if (!session?.user) return null;
@@ -30,12 +31,7 @@ export async function UserMenu() {
         <p className="text-sm text-muted-foreground truncate">{email}</p>
       </div>
 
-      <form
-        action={async () => {
-          'use server';
-          await signOut({ redirectTo: '/login' });
-        }}
-      >
+      <form action={signOutAction}>
         <Button type="submit" variant="ghost" size="icon" aria-label="Sign out">
           <LogOut className="h-4 w-4" />
         </Button>
