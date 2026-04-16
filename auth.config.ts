@@ -8,6 +8,7 @@ export const authConfig: NextAuthConfig = {
       clientSecret: process.env.AUTH_GOOGLE_SECRET!,
     }),
   ],
+  session: { strategy: 'jwt' },
   callbacks: {
     authorized({ auth: session, request }) {
       const isLoggedIn = !!session?.user;
@@ -24,9 +25,13 @@ export const authConfig: NextAuthConfig = {
       }
       return true;
     },
-    session({ session, user }) {
-      if (session.user && user) {
-        (session.user as typeof session.user & { id: string }).id = user.id;
+    jwt({ token, user }) {
+      if (user) token.id = user.id;
+      return token;
+    },
+    session({ session, token }) {
+      if (session.user && token.id) {
+        (session.user as typeof session.user & { id: string }).id = token.id as string;
       }
       return session;
     },
