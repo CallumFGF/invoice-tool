@@ -3,6 +3,10 @@ const nextConfig = {
   experimental: {
     instrumentationHook: true,
   },
+  webpack: (config) => {
+    config.resolve.fallback = { ...config.resolve.fallback, 'pg-native': false };
+    return config;
+  },
   // Headers to allow service worker scope
   async headers() {
     return [
